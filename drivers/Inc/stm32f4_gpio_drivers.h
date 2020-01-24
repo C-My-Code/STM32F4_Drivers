@@ -58,7 +58,7 @@
 
 
 
-//Essentially creates a GPIO pin configuration class
+//GPIO pin configuration structure
 typedef struct{
 	uint8_t GPIO_PinNumber;
 	uint8_t GPIO_PinMode;
@@ -68,7 +68,7 @@ typedef struct{
 	uint8_t GPIO_PinAltFuncMode;
 }GPIO_PinConfig_t;
 
-//Essentially creates a GPIO handler class
+//GPIO handle structure
 typedef struct{
 GPIO_RegDef_t *pGPIOx;  //This holds the base address for the GPIO port to which the pin belongs
 GPIO_PinConfig_t GPIO_PinConfig;

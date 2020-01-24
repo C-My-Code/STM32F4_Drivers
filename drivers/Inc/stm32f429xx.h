@@ -55,7 +55,7 @@
 
 /*----------Peripheral Register Definition Structures-----------*/
 
-//Basically creating a GPIO port class
+//GPIO Port Register Definition Structure
 typedef struct{
 volatile uint32_t MODER;
 volatile uint32_t OTYPER;
@@ -69,7 +69,7 @@ volatile uint32_t AFRL;
 volatile uint32_t AFRH;
 }GPIO_RegDef_t;
 
-//Basically creating a an RCC class
+//RCC Register Definition Structure
 typedef struct{
 volatile uint32_t CR;
 volatile uint32_t PLLCFGR;
@@ -109,7 +109,7 @@ volatile uint32_t PLLSAICFGR;
 volatile uint32_t DCKCFGR;
 }RCC_RegDef_t;
 
-//Equal to creating GPIO ports as a GPIO_RegDef_t class object
+//Creating GPIO ports as a GPIO_RegDef_t structure
 #define GPIOA   ((GPIO_RegDef_t*)GPIOA_BASE)
 #define GPIOB   ((GPIO_RegDef_t*)GPIOB_BASE)
 #define GPIOC   ((GPIO_RegDef_t*)GPIOC_BASE)
@@ -122,7 +122,7 @@ volatile uint32_t DCKCFGR;
 #define GPIOJ   ((GPIO_RegDef_t*)GPIOJ_BASE)
 #define GPIOK   ((GPIO_RegDef_t*)GPIOK_BASE)
 
-//Equal to creating a RCC_RegDef_t class object
+
 #define RCC   ((RCC_RegDef_t*)RCC_BASEADDR)
 
 
@@ -134,7 +134,6 @@ volatile uint32_t EXTI_RTSR;
 volatile uint32_t EXTI_FTSR;
 volatile uint32_t EXTI_SWIER;
 volatile uint32_t EXTI_PR;
-volatile uint32_t EXTI_EMR;
 }EXTI_RegDef_t;
 
 #define EXTI  ((EXTI_RegDef_t*)EXTI_BASE)
@@ -159,13 +158,12 @@ volatile uint32_t SYSCFG_CFGR;
 #define GPIOC_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<2))
 #define GPIOD_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<3))
 #define GPIOE_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<4))
-#define GPIOE_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<5))
-#define GPIOF_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<6))
-#define GPIOG_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<7))
-#define GPIOH_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<8))
-#define GPIOI_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<9))
-#define GPIOJ_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<10))
-#define GPIOK_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<11))
+#define GPIOF_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<5))
+#define GPIOG_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<6))
+#define GPIOH_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<7))
+#define GPIOI_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<8))
+#define GPIOJ_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<9))
+#define GPIOK_PCLK_ENABLE() 			(RCC->AHB1ENR |=  (1<<10))
 
 //ENABLE I2C Peri Clock
 #define I2CP1_PCLK_ENABLE()				(RCC->APB1ENR  |= (1<<21))
