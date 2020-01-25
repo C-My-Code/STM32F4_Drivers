@@ -1,8 +1,8 @@
 /*
  * stm32f429xx.h
  *
- *  Created on: Jan 10, 2020
- *      Author: Kevin
+ *  Last Update on: Jan 25, 2020
+ *      Author: Kevin Miller
  */
 #include<stdint.h>
 #ifndef INC_STM32F429XX_H_
@@ -206,9 +206,9 @@ volatile uint32_t SYSCFG_CFGR;
 #define GPIOK_PCLK_DISABLE() 			(RCC->AHB1ENR &=  ~(1<<10))
 
 //Disable I2C Peri Clock
-#define I2CP1_PCLK_DISABLE()				(RCC->APB1ENR  &= ~(1<<21))
-#define I2CP2_PCLK_DISABLE()				(RCC->APB1ENR  &= ~(1<<22))
-#define I2CP3_PCLK_DISABLE()				(RCC->APB1ENR  &= ~(1<<23))
+#define I2CP1_PCLK_DISABLE()			(RCC->APB1ENR  &= ~(1<<21))
+#define I2CP2_PCLK_DISABLE()			(RCC->APB1ENR  &= ~(1<<22))
+#define I2CP3_PCLK_DISABLE()			(RCC->APB1ENR  &= ~(1<<23))
 
 //Disable SPI Peri Clock
 #define SPI1_PCLK_DISABLE()				(RCC->APB2ENR &= ~(1<<12))
@@ -222,10 +222,10 @@ volatile uint32_t SYSCFG_CFGR;
 #define USART6_PCLK_DISABLE()			(RCC->APB2ENR &= ~(1<<5))
 
 //Disable UART Peri Clock
-#define UART4_PCLK_DISABLE()				(RCC->APB1ENR &= (1<<19))
-#define UART5_PCLK_DISABLE()				(RCC->APB1ENR &= (1<<20))
-#define UART7_PCLK_DISABLE()				(RCC->APB1ENR &= (1<<30))
-#define UART8_PCLK_DISABLE()				(RCC->APB1ENR &= (1<<31))
+#define UART4_PCLK_DISABLE()			(RCC->APB1ENR &= (1<<19))
+#define UART5_PCLK_DISABLE()			(RCC->APB1ENR &= (1<<20))
+#define UART7_PCLK_DISABLE()			(RCC->APB1ENR &= (1<<30))
+#define UART8_PCLK_DISABLE()			(RCC->APB1ENR &= (1<<31))
 
 //Disable SYSCFG Peri Clock
 #define SYSCFG_PCLK_DISABLE()			(RCC->APB2ENR &= ~(1<<14))

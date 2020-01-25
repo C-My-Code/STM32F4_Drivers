@@ -1,8 +1,8 @@
 /*
  * stm32f4_gpio_drivers.c
  *
- *  Created on: Jan 16, 2020
- *      Author: Kevin
+ *  Last Update on: Jan 25, 2020
+ *      Author: Kevin Miller
  */
 
 #include "stm32f4_gpio_drivers.h"
