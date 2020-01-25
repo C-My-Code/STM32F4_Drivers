@@ -44,6 +44,12 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 		}
 
 		//3. Configure the GPIO Port selection in SYSCFG_EXTICR
+		uint8_t temp_int1 = (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber/4);//Determines which EXTICR the pin belongs to
+		uint8_t temp_int2 = (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber%4);//Creates register shift value
+		SYSCFG_PCLK_ENABLE();
+		uint8_t EXTICR_Port_Code = FETCH_EXTICR_PORT_CODE(pGPIOHandle->pGPIOx);//Fetches GPIO port value for EXTICR register
+		SYSCFG->SYSCFG_EXTICR[temp_int1] |= (EXTICR_Port_Code<<(temp_int2*4));
+
 
 		//4. enable EXTI interrupt delivery using IMR
 		EXTI->EXTI_IMR |= (1<<pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);
@@ -248,7 +254,7 @@ uint16_t GPIO_Read_InputPort(GPIO_RegDef_t *pGPIOx){
 
 //GPIO Write to Output Pin
 /* @func	- GPIO_Write_OutputPin
- * @brief	- Writes to 8 bit output pin register
+ * @brief	- Writes output value to the GPIO output port register at the selected pin position
  * @param1	- *pGPIOx - pointer to GPIO port base address
  * @param2	- pinnumber - 8 bit pin number to write to
  * @param3  - uint8_t - 8 bit output value

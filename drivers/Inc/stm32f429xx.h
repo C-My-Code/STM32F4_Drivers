@@ -142,13 +142,12 @@ volatile uint32_t EXTI_PR;
 typedef struct{
 volatile uint32_t SYSCFG_MEMRMP;
 volatile uint32_t SYSCFG_PMC;
-volatile uint32_t SYSCFG_EXTICR1;
-volatile uint32_t SYSCFG_EXTICR2;
-volatile uint32_t SYSCFG_EXTICR3;
-volatile uint32_t SYSCFG_EXTICR4;
+volatile uint32_t SYSCFG_EXTICR[4];
 volatile uint32_t SYSCFG_CMPCR;
 volatile uint32_t SYSCFG_CFGR;
 }SYSCFG_RegDef_t;
+
+#define SYSCFG 	((SYSCFG_RegDef_t*)SYSCFG_BASE)
 
 /*  ---------------------ENABLE RCC PERIPHERAL CLOCK MACROS-----------------------------------*/
 
@@ -244,5 +243,17 @@ volatile uint32_t SYSCFG_CFGR;
 #define GPIOJ_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<9)); (RCC->AHB1RSTR &= ~(1<<9));} while(0)
 #define GPIOK_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<10)); (RCC->AHB1RSTR &= ~(1<<10));} while(0)
 
+//EXTICR PORT CODE MACRO
+#define FETCH_EXTICR_PORT_CODE(x)		((x== GPIOA) ? 0:\
+										 (x== GPIOB) ? 1:\
+										 (x== GPIOC) ? 2:\
+										 (x== GPIOD) ? 3:\
+										 (x== GPIOE) ? 4:\
+										 (x== GPIOF) ? 5:\
+										 (x== GPIOG) ? 6:\
+										 (x== GPIOH) ? 7:\
+										 (x== GPIOI) ? 8:\
+										 (x== GPIOJ) ? 9:\
+										 (x== GPIOK) ? 10:0)
 
 #endif /* INC_STM32F429XX_H_ */
