@@ -8,6 +8,21 @@
 #ifndef INC_STM32F429XX_H_
 #define INC_STM32F429XX_H_
 
+
+#define ENABLE	1
+#define DISABLE 0
+
+
+
+//Nested vectored interrupt controller (NVIC)
+#define NVIC_ISER_BASE			((volatile uint32_t*)0xE000E100)//Interrupt set-enable register base address
+#define NVIC_ICER_BASE			((volatile uint32_t*)0XE000E180)//Interrupt clear-enable register
+#define NVIC_ISPR_BASE			((volatile uint32_t*)0XE000E200)//Interrupt set-pending register
+#define NVIC_ICPR_BASE			((volatile uint32_t*)0XE000E280)//Interrupt clear-pending register
+#define NVIC_IABR_BASE			((volatile uint32_t*)0xE000E300)//Interrupt active bit register
+#define NVIC_IPR_BASE			((volatile uint32_t*)0xE000E400)//Interrupt priority register
+#define NVIC_OFFSET				0x04
+
 #define FLASH_BASEADDR			0x08000000U
 #define SRAM1_BASEADDR			0x20000000U
 #define SRAM2_BASEADDR          0x2001C000U
@@ -51,6 +66,7 @@
 #define USART6_BASE				0x40011400U
 #define EXTI_BASE				0x40013C00U
 #define SYSCFG_BASE				0x40013800U
+
 
 
 /*----------Peripheral Register Definition Structures-----------*/
@@ -137,6 +153,19 @@ volatile uint32_t EXTI_PR;
 }EXTI_RegDef_t;
 
 #define EXTI  ((EXTI_RegDef_t*)EXTI_BASE)
+
+//EXTICR PORT CODE MACRO
+#define FETCH_EXTICR_PORT_CODE(x)		((x== GPIOA) ? 0:\
+										 (x== GPIOB) ? 1:\
+										 (x== GPIOC) ? 2:\
+										 (x== GPIOD) ? 3:\
+										 (x== GPIOE) ? 4:\
+										 (x== GPIOF) ? 5:\
+										 (x== GPIOG) ? 6:\
+										 (x== GPIOH) ? 7:\
+										 (x== GPIOI) ? 8:\
+										 (x== GPIOJ) ? 9:\
+										 (x== GPIOK) ? 10:0)
 
 //SYSCFG Register Definition Structure
 typedef struct{
@@ -243,17 +272,15 @@ volatile uint32_t SYSCFG_CFGR;
 #define GPIOJ_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<9)); (RCC->AHB1RSTR &= ~(1<<9));} while(0)
 #define GPIOK_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<10)); (RCC->AHB1RSTR &= ~(1<<10));} while(0)
 
-//EXTICR PORT CODE MACRO
-#define FETCH_EXTICR_PORT_CODE(x)		((x== GPIOA) ? 0:\
-										 (x== GPIOB) ? 1:\
-										 (x== GPIOC) ? 2:\
-										 (x== GPIOD) ? 3:\
-										 (x== GPIOE) ? 4:\
-										 (x== GPIOF) ? 5:\
-										 (x== GPIOG) ? 6:\
-										 (x== GPIOH) ? 7:\
-										 (x== GPIOI) ? 8:\
-										 (x== GPIOJ) ? 9:\
-										 (x== GPIOK) ? 10:0)
+
+
+/*------------------INTERRPUT REQUEST(IRQ) NUMBER MACROS---------------------------------------*/
+#define IRQ_NO_EXTI0	6
+#define IRQ_NO_EXTI1	7
+#define IRQ_NO_EXTI2	8
+#define IRQ_NO_EXTI3	9
+#define IRQ_NO_EXTI4	10
+#define IRQ_NO_EXTI9_5	23
+#define IRQ_NO_EXTI5_10	40
 
 #endif /* INC_STM32F429XX_H_ */
