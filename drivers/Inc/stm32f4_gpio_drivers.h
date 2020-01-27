@@ -101,11 +101,4 @@ void GPIO_IRQHandling(uint8_t pinnumber);
 
 
 
-
-
-
-
-
-
-
 #endif /* INC_STM32F4_GPIO_DRIVERS_H_ */

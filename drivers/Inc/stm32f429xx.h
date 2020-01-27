@@ -16,7 +16,23 @@
 
 //Nested vectored interrupt controller (NVIC)
 #define NVIC_ISER_BASE			((volatile uint32_t*)0xE000E100)//Interrupt set-enable register base address
+#define NVIC_ISER_1				((volatile uint32_t*)0xE000E104)
+#define NVIC_ISER_2				((volatile uint32_t*)0xE000E108)
+#define NVIC_ISER_3				((volatile uint32_t*)0xE000E10C)
+#define NVIC_ISER_4				((volatile uint32_t*)0xE000E110)
+#define NVIC_ISER_5				((volatile uint32_t*)0xE000E114)
+#define NVIC_ISER_6				((volatile uint32_t*)0xE000E118)
+#define NVIC_ISER_7				((volatile uint32_t*)0xE000E11C)
+
 #define NVIC_ICER_BASE			((volatile uint32_t*)0XE000E180)//Interrupt clear-enable register
+#define NVIC_ICER_1			    ((volatile uint32_t*)0XE000E184)
+#define NVIC_ICER_2			    ((volatile uint32_t*)0XE000E188)
+#define NVIC_ICER_3			    ((volatile uint32_t*)0XE000E18C)
+#define NVIC_ICER_4			    ((volatile uint32_t*)0XE000E190)
+#define NVIC_ICER_5			    ((volatile uint32_t*)0XE000E194)
+#define NVIC_ICER_6			    ((volatile uint32_t*)0XE000E198)
+#define NVIC_ICER_7			    ((volatile uint32_t*)0XE000E19C)
+
 #define NVIC_ISPR_BASE			((volatile uint32_t*)0XE000E200)//Interrupt set-pending register
 #define NVIC_ICPR_BASE			((volatile uint32_t*)0XE000E280)//Interrupt clear-pending register
 #define NVIC_IABR_BASE			((volatile uint32_t*)0xE000E300)//Interrupt active bit register
@@ -275,12 +291,12 @@ volatile uint32_t SYSCFG_CFGR;
 
 
 /*------------------INTERRPUT REQUEST(IRQ) NUMBER MACROS---------------------------------------*/
-#define IRQ_NO_EXTI0	6
-#define IRQ_NO_EXTI1	7
-#define IRQ_NO_EXTI2	8
-#define IRQ_NO_EXTI3	9
-#define IRQ_NO_EXTI4	10
-#define IRQ_NO_EXTI9_5	23
-#define IRQ_NO_EXTI5_10	40
+#define IRQ_NO_EXTI0	    6
+#define IRQ_NO_EXTI1	    7
+#define IRQ_NO_EXTI2	    8
+#define IRQ_NO_EXTI3	    9
+#define IRQ_NO_EXTI4	    10
+#define IRQ_NO_EXTI9_5	    23
+#define IRQ_NO_EXTI15_10	40
 
 #endif /* INC_STM32F429XX_H_ */

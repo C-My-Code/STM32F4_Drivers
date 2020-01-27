@@ -306,25 +306,25 @@ void GPIO_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable){
 			*NVIC_ISER_BASE |= (1<<IRQNumber);
 		}
 		else if(IRQNumber>=32&&IRQNumber<=63){//Determines if interrupt belongs to NVIC_ISER1
-			*(NVIC_ISER_BASE+NVIC_OFFSET) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_1 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=64&&IRQNumber<=95){//Determines if interrupt belongs to NVIC_ISER2
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*2)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_2 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=96&&IRQNumber<=127){//Determines if interrupt belongs to NVIC_ISER3
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*3)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_3 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=128&&IRQNumber<=159){//Determines if interrupt belongs to NVIC_ISER4
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*4)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_4 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=160&&IRQNumber<=191){//Determines if interrupt belongs to NVIC_ISER5
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*5)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_5 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=192&&IRQNumber<=223){//Determines if interrupt belongs to NVIC_ISER6
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*6)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_6 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=224&&IRQNumber<=239){//Determines if interrupt belongs to NVIC_ISER7
-			*(NVIC_ISER_BASE+(NVIC_OFFSET*7)) |= (1<<(IRQNumber%32));
+			*NVIC_ISER_7 |= (1<<(IRQNumber%32));
 		}
 	}
 	else{
@@ -332,37 +332,49 @@ void GPIO_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable){
 			*NVIC_ICER_BASE |= (1<<IRQNumber);
 		}
 		else if(IRQNumber>=32&&IRQNumber<=63){//Determines if interrupt belongs to NVIC_ICER1
-			*(NVIC_ICER_BASE+NVIC_OFFSET) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_1 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=64&&IRQNumber<=95){//Determines if interrupt belongs to NVIC_ICER2
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*2)) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_2 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=96&&IRQNumber<=127){//Determines if interrupt belongs to NVIC_ICER3
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*3))= (1<<(IRQNumber%32));
+			*NVIC_ICER_3= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=128&&IRQNumber<=159){//Determines if interrupt belongs to NVIC_ICER4
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*4)) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_4 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=160&&IRQNumber<=191){//Determines if interrupt belongs to NVIC_ICER5
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*5)) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_5 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=192&&IRQNumber<=223){//Determines if interrupt belongs to NVIC_ICER6
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*6)) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_6 |= (1<<(IRQNumber%32));
 		}
 		else if(IRQNumber>=224&&IRQNumber<=239){//Determines if interrupt belongs to NVIC_ICER7
-			*(NVIC_ICER_BASE+(NVIC_OFFSET*7)) |= (1<<(IRQNumber%32));
+			*NVIC_ICER_7 |= (1<<(IRQNumber%32));
 		}
 
 	}
+}
 
+//GPIO Interrupt Priority Configuration
+/* @func	- GPIO_IRQ_Priority_Config
+ * @brief 	- Sets the priority for a given interrupt
+ * @param1	- IRQNumber - interrupt number for the EXTI line you intend to configure. See stm32f429xx.h "INTERRPUT REQUEST(IRQ) NUMBER MACROS"
+ * @param2	- IRQPriority  - 4 bit priority value
+ * */
 void GPIO_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority){
 	uint8_t IP_reg = IRQNumber/4;//Calculates which priority register address row the interrupt belongs to (0-59)
 	uint8_t IP_Section = IRQNumber%4;//This determines which partition the IRQ# belongs in. Each address row is divided into 4 byte sized partitions, one byte for each IRQNumber.
 	*(NVIC_ISPR_BASE+(IP_reg*NVIC_OFFSET)) |= ((IRQPriority<<4)<<(IP_Section*8));//Shifts the value 4 bits past 0th partition bit(only bits 7:4 are read) and stores it in the correct priority register address row.
 }
 
-void GPIO_IRQHandling(uint8_t pinnumber);
-	//NEXT UP
+void GPIO_IRQHandling(uint8_t pinnumber){
+	if(EXTI->EXTI_PR & (1<<pinnumber)){//Checks for pending interrupt on the specified pin number
+		EXTI->EXTI_PR  |= (1<<pinnumber);//Clears the pending interrupt register bit for that pin position. This register is cleared by setting the bit to "1"
+	}
 }
+
+
+
 
 
