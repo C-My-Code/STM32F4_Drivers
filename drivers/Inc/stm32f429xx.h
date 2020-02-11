@@ -87,6 +87,19 @@
 
 /*----------Peripheral Register Definition Structures-----------*/
 
+//SPI Register Definition Structure
+typedef struct{
+volatile uint32_t SPI_CR1;
+volatile uint32_t SPI_CR2;
+volatile uint32_t SPI_SR;
+volatile uint32_t SPI_DR;
+volatile uint32_t SPI_CRCPR;
+volatile uint32_t SPI_RXCRCR;
+volatile uint32_t SPI_TXCRCR;
+volatile uint32_t SPI_I2SCFGR;
+volatile uint32_t SPI_I2SPR;
+}SPI_RegDef_t;
+
 //GPIO Port Register Definition Structure
 typedef struct{
 volatile uint32_t MODER;
@@ -235,6 +248,7 @@ volatile uint32_t SYSCFG_CFGR;
 #define SYSCFG_PCLK_ENABLE()			(RCC->APB2ENR |= (1<<14))
 
 
+
 /*----------------DISABLE RCC PERIPHERAL CLOCK MACROS-------------------------*/
 
 //Disable GPIO Peri Clock
@@ -287,7 +301,6 @@ volatile uint32_t SYSCFG_CFGR;
 #define GPIOI_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<8)); (RCC->AHB1RSTR &= ~(1<<8));} while(0)
 #define GPIOJ_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<9)); (RCC->AHB1RSTR &= ~(1<<9));} while(0)
 #define GPIOK_REG_RESET()				do{(RCC->AHB1RSTR |= (1<<10)); (RCC->AHB1RSTR &= ~(1<<10));} while(0)
-
 
 
 /*------------------INTERRPUT REQUEST(IRQ) NUMBER MACROS---------------------------------------*/

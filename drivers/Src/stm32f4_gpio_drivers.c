@@ -365,7 +365,7 @@ void GPIO_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable){
 void GPIO_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority){
 	uint8_t IP_reg = IRQNumber/4;//Calculates which priority register address row the interrupt belongs to (0-59)
 	uint8_t IP_Section = IRQNumber%4;//This determines which partition the IRQ# belongs in. Each address row is divided into 4 byte sized partitions, one byte for each IRQNumber.
-	*(NVIC_ISPR_BASE+(IP_reg*NVIC_OFFSET)) |= ((IRQPriority<<4)<<(IP_Section*8));//Shifts the value 4 bits past 0th partition bit(only bits 7:4 are read) and stores it in the correct priority register address row.
+	*(NVIC_ISPR_BASE+IP_reg) |= ((IRQPriority<<4)<<(IP_Section*8));//Shifts the value 4 bits past 0th partition bit(only bits 7:4 are read) and stores it in the correct priority register address row.
 }
 
 void GPIO_IRQHandling(uint8_t pinnumber){
