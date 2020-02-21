@@ -1,7 +1,7 @@
 /*
  * stm32f4_spi_drivers.h
  *
- *  Created on: Jan 30, 2020
+ *  Created on: Feb 14, 2020
  *      Author: Kevin
  */
 
@@ -11,8 +11,9 @@
 
 
 
-//SPI Configuration Structure (SPI_CR1)
+//SPI Configuration Structure (SPI_CR1 & SPI_CR2)
 typedef struct{
+//CR1
 uint8_t BIDIMODE;//Bidirectional data mode enable
 uint8_t BIDIOE;//Output enable in bidirectional mode
 uint8_t DFF;//Data frame format
@@ -25,6 +26,15 @@ uint8_t BR;//Baud rate control
 uint8_t MSTR;//Master selection
 uint8_t CPOL;//Clock polarity
 uint8_t CPHA;//Clock phase
+
+//CR2
+uint8_t TXEIE;//Tx buffer empty interrupt enable
+uint8_t RXNEIE;//RX buffer not empty interrupt enable
+uint8_t ERRIE;//Error interrupt enable
+uint8_t FRF;//Frame format
+uint8_t	SSOE;//SS output enable
+uint8_t	TXDMAEN;//Tx buffer DMA enable
+uint8_t	RXDMAEN;//Rx buffer DMA enable
 }SPI_Config_t;
 
 //SPI I2S Configuration Structure
@@ -68,7 +78,7 @@ SPI_I2C_RCCPLL_t I2SRCCPLL;
 
 
 /*
- * SPI CONFIGURATION MACROS
+ * SPI CR1 CONFIGURATION MACROS
  */
 /*-------SPI CLOCK PHASE-------*/
 #define SPI_CLKPHASE_FIRSTCLOCK		0 	//The first clock transition is the first data capture edge
@@ -83,14 +93,14 @@ SPI_I2C_RCCPLL_t I2SRCCPLL;
 #define SPI_MODE_MASTER		1			//Master configuration
 
 /*-------SPI BRAUD RATE----------*/
-#define SPI_BRAUD_/2		000 //pclk/2
-#define SPI_BRAUD_/4		001	//pclk/4
-#define SPI_BRAUD_/8		010 //pclk/8
-#define SPI_BRAUD_/16		011 //pclk/16
-#define SPI_BRAUD_/32   	100 //pclk/32
-#define SPI_BRAUD_/64		101 //pclk/64
-#define SPI_BRAUD_/128		110 //pclk/128
-#define SPI_BRAUD_/256		111 //pclk/256
+#define SPI_BRAUD_2		000 //pclk/2
+#define SPI_BRAUD_4		001	//pclk/4
+#define SPI_BRAUD_8		010 //pclk/8
+#define SPI_BRAUD_16	011 //pclk/16
+#define SPI_BRAUD_32   	100 //pclk/32
+#define SPI_BRAUD_64	101 //pclk/64
+#define SPI_BRAUD_128	110 //pclk/128
+#define SPI_BRAUD_256	111 //pclk/256
 
 /*-------SPI LSBFIRST---------*/
 #define SPI_LSBFIRST_MSB	0
@@ -174,7 +184,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle);
 void SPI_Disable(SPI_RegDef_t *pSPIx);
 
 //Enable/Disable SPI I2S
-void SPI_I2S_Init(SPI_Handle_t *pSPIHandle);
+void SPI_I2S_Init(SPI_I2S_Handle_t *pI2SHandle);
 void SPI_I2S_Disable(SPI_RegDef_t *pSPIx);
 
 //Peripheral Clock Setup

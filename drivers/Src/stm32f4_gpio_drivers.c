@@ -1,7 +1,7 @@
 /*
  * stm32f4_gpio_drivers.c
  *
- *  Last Update on: Jan 25, 2020
+ *  Last Update on: Feb 14, 2020
  *      Author: Kevin Miller
  */
 
@@ -13,7 +13,7 @@
 
 //Enable GPIO Port
 /* @func	 - GPIO_Init
- * @brief    - initializes GPIO port
+ * @brief    - initializes GPIO port and clock
  * @param1   - *pGPIOHandle - pointer to GPIO handle struct that contains GPIO port base address and pin configuration struct see: stm32f4_gpio_drivers.h
  * */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
@@ -90,12 +90,13 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 	}
 	temp_int = 0;
 
+	GPIO_PCLK_Control(pGPIOHandle->pGPIOx, ENABLE); //Enable peripheral clock
 
 }
 
 //Disable GPIO Port
 /* @func	 - GPIO_Disable
- * @brief    - Disables GPIO port
+ * @brief    - Disables GPIO port and clock
  * @param1   - *pGPIOx - pointer to GPIO port base address
  * */
 void GPIO_Disable(GPIO_RegDef_t *pGPIOx){
@@ -135,6 +136,7 @@ void GPIO_Disable(GPIO_RegDef_t *pGPIOx){
 			GPIOK_REG_RESET();
 			break;
 		}
+	GPIO_PCLK_Control(pGPIOx, DISABLE); //Disable peripheral clock
 }
 
 
