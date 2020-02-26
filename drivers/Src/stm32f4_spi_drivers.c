@@ -1,7 +1,7 @@
 /*
  * stm32f4_spi_drivers.c
  *
- *  Created on: Feb 14, 2020
+ *  Created on: Feb 21, 2020
  *      Author: Kevin
  */
 
@@ -19,10 +19,10 @@
 void SPI_Init(SPI_Handle_t *pSPIHandle){
 
 	SPI_Disable(pSPIHandle->pSPIx);//Using disable to clear CR1 & CR2 control register values
-
+	SPI_PCLK_Control(pSPIHandle->pSPIx, ENABLE);
 
 	/*-----------CR1 Configuration--------------*/
-	uint16_t temp = 0;//Temporary unsigned int for CR1 register value
+	uint32_t temp = 0;//Temporary unsigned int for CR1 register value
 
 	//set Bidirectional data mode
 	temp |= (pSPIHandle->SPIConfig.BIDIMODE<<15);//Shifts value to BIDIMODE configuration bit field
@@ -61,36 +61,36 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 	temp |= (pSPIHandle->SPIConfig.CPHA<<0);//Shifts value to CPHA configuration bit field
 
 	/*------------CR2 Configuration-----------------*/
-	uint16_t temp2 = 0;//Temporary unsigned int for CR2 register value
+	uint32_t temp2 = 0;//Temporary unsigned int for CR2 register value
 
 	//set Tx buffer empty interrupt
-	temp2 |= (pSPIHandle->SPIConfig.TXEIE<<7);
+	//temp2 |= (pSPIHandle->SPIConfig.TXEIE<<7);
 
 	//set RX buffer not empty interrupt
-	temp2 |= (pSPIHandle->SPIConfig.RXNEIE<<6);
+	//temp2 |= (pSPIHandle->SPIConfig.RXNEIE<<6);
 
 	//set Error interrupt
-	temp2 |= (pSPIHandle->SPIConfig.ERRIE<<5);
+	//temp2 |= (pSPIHandle->SPIConfig.ERRIE<<5);
 
 	//set Frame format
-	temp2 |= (pSPIHandle->SPIConfig.FRF<<4);
+	//temp2 |= (pSPIHandle->SPIConfig.FRF<<4);
 
 	//set SS output enable
-	temp2 |= (pSPIHandle->SPIConfig.SSOE<<3);
+	temp2 |= (pSPIHandle->SPIConfig.SSOE<<2);
 
 	//set Tx buffer DMA
-	temp2 |= (pSPIHandle->SPIConfig.TXDMAEN<<2);
+	//temp2 |= (pSPIHandle->SPIConfig.TXDMAEN<<1);
 
 	//set Rx buffer DMA
-	temp2 |= (pSPIHandle->SPIConfig.RXDMAEN<<2);
+	//temp2 |= (pSPIHandle->SPIConfig.RXDMAEN<<0);
 
 	/*----------Pass configurations to SPI control registers-----------*/
-
 	//Pass Configuration to (SPI_CR1) Register
-	pSPIHandle->pSPIx->SPI_CR1 = temp;//Sets CR1 register to value of temp
+	pSPIHandle->pSPIx->CR1 = temp;//Sets CR1 register to value of temp
 
 	//Pass Configuration to (SPI_CR2) Register
-	pSPIHandle->pSPIx->SPI_CR2 = temp2;//Sets CR2 register to value of temp2
+	pSPIHandle->pSPIx->CR2 |= temp2;//Sets CR2 register to value of temp2
+
 
 
 
@@ -103,12 +103,14 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
  * */
 void SPI_Disable(SPI_RegDef_t *pSPIx){
 	//Blocking loops to prevent disabling communication during transmission
-	while(!(pSPIx->SPI_SR & 2));//Waits for Tx buffer to be empty
-	while((pSPIx->SPI_SR & 1));//Waits for Rx buffer to be empty
-	while((pSPIx->SPI_SR & 128));//Waits for Busy flag
+	//while(!(pSPIx->SPI_SR & 2));//Waits for Tx buffer to be empty
+	//while((pSPIx->SPI_SR & 1));//Waits for Rx buffer to be empty
+	while((pSPIx->SR & 128));//Waits for Busy flag
 
-	pSPIx->SPI_CR1 &= ~(0X1111111111111111);//clears all bits in SPI_CR1 register
-	pSPIx->SPI_CR2 &= ~(0X1111111111111111);//clears all configuration bits in SPI_CR2 register
+	pSPIx->CR1 &= ~(0xFFFF);//clears all bits in SPI_CR1 register
+	pSPIx->CR2 &= ~(0xFFFF);//clears all configuration bits in SPI_CR2 register
+	SPI_PCLK_Control(pSPIx, DISABLE);
+
 }
 
 
@@ -121,7 +123,7 @@ void SPI_I2S_Init(SPI_I2S_Handle_t *pI2SHandle){
 	SPI_Disable(pI2SHandle->pSPIx);
 	SPI_I2S_Disable(pI2SHandle->pSPIx);
 	uint16_t temp = 0;
-
+	SPI_PCLK_Control(pI2SHandle->pSPIx, ENABLE);
 	/*-------Configure SPI_I2SCFGR-----*/
 	//set I2S mode selection
 	temp |= (pI2SHandle->I2SConfig.I2SMOD<<11);//Shifts value to I2SMOD configuration bit field
@@ -148,7 +150,7 @@ void SPI_I2S_Init(SPI_I2S_Handle_t *pI2SHandle){
 	temp |= (pI2SHandle->I2SConfig.CHLEN<<0);//Shifts value to CHLEN configuration bit field. Only has meaning if DATLEN = 0
 
 	//Pass Configuration to SPI_I2SCFGR register
-	pI2SHandle->pSPIx->SPI_I2SCFGR |= temp;//Sets SPI_I2SCFGR register to value of temp. Uses OR operator to avoid changing value of reserved registers.
+	pI2SHandle->pSPIx->I2SCFGR |= temp;//Sets SPI_I2SCFGR register to value of temp. Uses OR operator to avoid changing value of reserved registers.
 	temp = 0;
 
 	/*-------Configure SPI_I2SPR-----*/
@@ -162,7 +164,7 @@ void SPI_I2S_Init(SPI_I2S_Handle_t *pI2SHandle){
 	temp |= (pI2SHandle->I2SPrescaler.I2SDIV<<0);//Shifts value to I2SDIV configuration bit field
 
 	//Pass Configuration to SPI_I2SPR register
-	pI2SHandle->pSPIx->SPI_I2SPR |= temp;//Sets SPI_I2SPR register to value of temp. Uses OR operator to avoid changing value of reserved registers.
+	pI2SHandle->pSPIx->I2SPR |= temp;//Sets SPI_I2SPR register to value of temp. Uses OR operator to avoid changing value of reserved registers.
 
 
 	/*--------------------Configure RCC_PLLI2SCFGR-------------------*/
@@ -173,15 +175,18 @@ void SPI_I2S_Init(SPI_I2S_Handle_t *pI2SHandle){
 
 }
 
+
 //Disable SPI I2s Port
 /* @func	 - SPI_I2S_Disable
  * @brief    - Disables SPI port by clearing all bits in configuration and prescaler registers
  * @param1   - *pSPIx - pointer to SPI port base address
  * */
 void SPI_I2S_Disable(SPI_RegDef_t *pSPIx){
-	pSPIx->SPI_I2SCFGR &= ~(0x1111111111111111);//clears all bits
-	pSPIx->SPI_I2SPR &= ~(0x1111111111111111);//clears all bits
+	pSPIx->I2SCFGR &= ~(0xFFFF);//clears all bits
+	pSPIx->I2SPR &= ~(0xFFFF);//clears all bits
+	SPI_PCLK_Control(pSPIx, DISABLE);
 }
+
 
 
 //Peripheral Clock Setup
@@ -232,24 +237,39 @@ void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length){
 
 	while(length > 0){
 
-		while(!(pSPIx->SPI_SR & (1<<1)));//Waiting for TX buffer to be empty
+		while(!(pSPIx->SR & 2));//Waiting for TX buffer to be empty
 
-		if(pSPIx->SPI_CR1 & (1<<11)){//If data frame size is 16 bit
-			pSPIx->SPI_DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
+		if(pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
+			pSPIx->DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
 			length-=2;//decrementing 2 for 2 bytes
 			(uint16_t*)pTxBuffer++;
 		}
 		else{//data frame size is 8 bit
-			pSPIx->SPI_DR = *pTxBuffer;
+			pSPIx->DR = *pTxBuffer;
 			length--;//decrementing 1 for 1 byte
-			pTxBuffer++;
+			*pTxBuffer++;
 		}
 	}
 }
 
 
-//Left off here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-uint16_t SPI_Receive(uint8_t *pRxBuffer, uint32_t length);
+
+void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length){
+
+	while(length>0){
+		while(pSPIx->SR & 0x01);//Waiting for data to be in buffer
+		if(pSPIx->CR1 & (1<<11)){
+		*((uint16_t*)pRxBuffer) = pSPIx->DR;
+		length-=2;
+		(uint16_t*)pRxBuffer++;
+		}
+		else{
+		*pRxBuffer = pSPIx->DR;
+		length--;
+		*pRxBuffer++;
+		}
+	}
+}
 
 //IRQ Config & ISR Handling
 void SPI_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable);

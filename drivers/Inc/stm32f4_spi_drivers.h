@@ -1,7 +1,7 @@
 /*
  * stm32f4_spi_drivers.h
  *
- *  Created on: Feb 14, 2020
+ *  Created on: Feb 21, 2020
  *      Author: Kevin
  */
 
@@ -93,14 +93,14 @@ SPI_I2C_RCCPLL_t I2SRCCPLL;
 #define SPI_MODE_MASTER		1			//Master configuration
 
 /*-------SPI BRAUD RATE----------*/
-#define SPI_BRAUD_2		000 //pclk/2
-#define SPI_BRAUD_4		001	//pclk/4
-#define SPI_BRAUD_8		010 //pclk/8
-#define SPI_BRAUD_16	011 //pclk/16
-#define SPI_BRAUD_32   	100 //pclk/32
-#define SPI_BRAUD_64	101 //pclk/64
-#define SPI_BRAUD_128	110 //pclk/128
-#define SPI_BRAUD_256	111 //pclk/256
+#define SPI_BRAUD_2		0 //pclk/2
+#define SPI_BRAUD_4		1	//pclk/4
+#define SPI_BRAUD_8		2 //pclk/8
+#define SPI_BRAUD_16	3 //pclk/16
+#define SPI_BRAUD_32   	1 //pclk/32
+#define SPI_BRAUD_64	5 //pclk/64
+#define SPI_BRAUD_128	6 //pclk/128
+#define SPI_BRAUD_256	7 //pclk/256
 
 /*-------SPI LSBFIRST---------*/
 #define SPI_LSBFIRST_MSB	0
@@ -192,7 +192,7 @@ void SPI_PCLK_Control(SPI_RegDef_t *pSPIx, uint8_t EnableDisable);
 
 //SPI Send & Receive
 void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length);
-uint16_t SPI_Receive(uint8_t *pRxBuffer, uint32_t length);
+void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length);
 
 //IRQ Config & ISR Handling
 void SPI_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable);

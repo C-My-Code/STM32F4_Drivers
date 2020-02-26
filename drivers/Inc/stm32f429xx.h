@@ -1,7 +1,7 @@
 /*
  * stm32f429xx.h
  *
- *  Last Update on: Jan 25, 2020
+ *  Last Update on: Feb 21, 2020
  *      Author: Kevin Miller
  */
 #include<stdint.h>
@@ -89,16 +89,21 @@
 
 //SPI Register Definition Structure
 typedef struct{
-volatile uint32_t SPI_CR1;
-volatile uint32_t SPI_CR2;
-volatile uint32_t SPI_SR;
-volatile uint32_t SPI_DR;
-volatile uint32_t SPI_CRCPR;
-volatile uint32_t SPI_RXCRCR;
-volatile uint32_t SPI_TXCRCR;
-volatile uint32_t SPI_I2SCFGR;
-volatile uint32_t SPI_I2SPR;
+volatile uint32_t CR1;
+volatile uint32_t CR2;
+volatile uint32_t SR;
+volatile uint32_t DR;
+volatile uint32_t CRCPR;
+volatile uint32_t RXCRCR;
+volatile uint32_t TXCRCR;
+volatile uint32_t I2SCFGR;
+volatile uint32_t I2SPR;
 }SPI_RegDef_t;
+
+//Creating SPI ports as a SPI_RegDef_t structure
+#define SPI1	((SPI_RegDef_t*)SPI1_BASE)
+#define SPI2	((SPI_RegDef_t*)SPI2_BASE)
+#define SPI3	((SPI_RegDef_t*)SPI3_BASE)
 
 //GPIO Port Register Definition Structure
 typedef struct{

@@ -18,6 +18,7 @@
  * */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 
+	GPIO_PCLK_Control(pGPIOHandle->pGPIOx, ENABLE); //Enable peripheral clock
 	uint32_t temp_int = 0;
 
 	//1.  Configure GPIO pin mode
@@ -90,7 +91,7 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle){
 	}
 	temp_int = 0;
 
-	GPIO_PCLK_Control(pGPIOHandle->pGPIOx, ENABLE); //Enable peripheral clock
+
 
 }
 
