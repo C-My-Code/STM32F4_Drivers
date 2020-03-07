@@ -66,6 +66,12 @@ uint8_t  PLLI2SR;//PLLI2S division factor for I2S clocks
 typedef struct{
 SPI_RegDef_t *pSPIx;
 SPI_Config_t SPIConfig;
+uint8_t		 *pTxBuffer;
+uint8_t		 *pRxBuffer;
+uint32_t	 TxLen;
+uint32_t	 RxLen;
+uint8_t		 TxState;
+uint8_t		 RxState;
 }SPI_Handle_t;
 
 //SPI I2S Handle Structure
@@ -190,13 +196,23 @@ void SPI_I2S_Disable(SPI_RegDef_t *pSPIx);
 //Peripheral Clock Setup
 void SPI_PCLK_Control(SPI_RegDef_t *pSPIx, uint8_t EnableDisable);
 
-//SPI Send & Receive
-void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length);
-void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length);
+//SPI Send & Receive - Blocking Call(non-interrupt)
+void SPI_Send(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length);
+void SPI_Receive(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length);
+
+//SPI Send & Receive - Interrupt
+void SPI_Send_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length);
+void SPI_Receive_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length);
 
 //IRQ Config & ISR Handling
 void SPI_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable);
 void SPI_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority);
 void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
+static void SPI_Tx_IR_Handle();
+static void SPI_Rx_IR_Handle();
+static void SPI_Ovr_IR_Handle();
+
+void SPI_Close_Tx(SPI_Handle_t *pSPIHandle);
+void SPI_Close_Rx(SPI_Handle_t *pSPIHandle);
 
 #endif /* INC_STM32F4_SPI_DRIVERS_H_ */

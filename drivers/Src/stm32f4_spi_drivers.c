@@ -63,12 +63,6 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 	/*------------CR2 Configuration-----------------*/
 	uint32_t temp2 = 0;//Temporary unsigned int for CR2 register value
 
-	//set Tx buffer empty interrupt
-	//temp2 |= (pSPIHandle->SPIConfig.TXEIE<<7);
-
-	//set RX buffer not empty interrupt
-	//temp2 |= (pSPIHandle->SPIConfig.RXNEIE<<6);
-
 	//set Error interrupt
 	//temp2 |= (pSPIHandle->SPIConfig.ERRIE<<5);
 
@@ -77,12 +71,6 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 
 	//set SS output enable
 	temp2 |= (pSPIHandle->SPIConfig.SSOE<<2);
-
-	//set Tx buffer DMA
-	//temp2 |= (pSPIHandle->SPIConfig.TXDMAEN<<1);
-
-	//set Rx buffer DMA
-	//temp2 |= (pSPIHandle->SPIConfig.RXDMAEN<<0);
 
 	/*----------Pass configurations to SPI control registers-----------*/
 	//Pass Configuration to (SPI_CR1) Register
@@ -225,53 +213,216 @@ if(EnableDisable == 1){
  }
 }
 
-//SPI Send & Receive
+//SPI Send - Blocking Call(non-interrupt)
 /* @func	- SPI_Send
  * @brief	- Sends output to the data register
- * @param1	- *pSPIx - pointer to SPI address
- * @param2  - *pTxBuffer - pointer the output data location
- * @param3  - length - size of output data in bytes
+ * @param1	- *pSPIHandle - pointer to SPI handle structure
+ * @param2  - *pTxBuffer - pointer to location of data to be transmitted
+ * @param3  - length - size of outbound data in bytes
  * */
-void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length){
-
+void SPI_Send(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
 
 	while(length > 0){
 
-		while(!(pSPIx->SR & 2));//Waiting for TX buffer to be empty
+		while(!(pSPIHandle->pSPIx->SR & 2));//Waiting for TX buffer to be empty(blocking call)
 
-		if(pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
-			pSPIx->DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
+		if(pSPIHandle->pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
+			pSPIHandle->pSPIx->DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
 			length-=2;//decrementing 2 for 2 bytes
 			(uint16_t*)pTxBuffer++;
 		}
 		else{//data frame size is 8 bit
-			pSPIx->DR = *pTxBuffer;
+			pSPIHandle->pSPIx->DR = *pTxBuffer;
 			length--;//decrementing 1 for 1 byte
-			*pTxBuffer++;
+			pTxBuffer++;
 		}
 	}
 }
 
 
 
-void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length){
+//SPI Receive - Blocking Call(non-interrupt)
+/* @func	- SPI_Receive
+ * @brief	- Reads data from the data register
+ * @param1	- *pSPIHandle - pointer to SPI handle structure
+ * @param2  - *pRxBuffer - pointer to location received data is to be stored
+ * @param3  - length - size of inbound data in bytes
+ * */
+void SPI_Receive(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length){
 
-	while(length>0){
-		while(pSPIx->SR & 0x01);//Waiting for data to be in buffer
-		if(pSPIx->CR1 & (1<<11)){
-		*((uint16_t*)pRxBuffer) = pSPIx->DR;
+	while(length > 0){
+		while(pSPIHandle->pSPIx->SR & 0x01);//Waiting for data to be in buffer(blocking call)
+		if(pSPIHandle->pSPIx->CR1 & (1<<11)){
+		*((uint16_t*)pRxBuffer) = pSPIHandle->pSPIx->DR;
 		length-=2;
 		(uint16_t*)pRxBuffer++;
 		}
 		else{
-		*pRxBuffer = pSPIx->DR;
+		*pRxBuffer = pSPIHandle->pSPIx->DR;
 		length--;
-		*pRxBuffer++;
+		pRxBuffer++;
 		}
 	}
 }
 
-//IRQ Config & ISR Handling
-void SPI_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable);
-void SPI_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority);
-void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
+//SPI Send & Receive - Interrupt based
+void SPI_Send_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
+
+	if(!(pSPIHandle->TxState == 1)){//Checks for idle Tx
+	pSPIHandle->pTxBuffer = pTxBuffer;
+	pSPIHandle->TxLen = length;
+	pSPIHandle->TxState = 1;//Sets TxState to busy
+	pSPIHandle->pSPIx->CR2 |= (1<<7);//Enables TXEIE Interrupt
+	}
+
+}
+void SPI_Receive_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length){
+
+	if(!(pSPIHandle->RxState == 1)){
+	pSPIHandle->pRxBuffer = pRxBuffer;
+	pSPIHandle->RxLen = length;
+	pSPIHandle->RxState = 1;
+	pSPIHandle->pSPIx->CR2 |= (1<<6);//Enables RXNEIE Interrupt
+	}
+}
+
+//SPI Interrupt Enable & Disable
+/* @func	- SPI_IRQ_EnableDisable
+ * @brief	- Enables or disables SPI interrupt
+ * @param1	- IRQNumber - IRQNumber for the SPI line to enable or disable. See stm32f429xx.h INTERRPUT REQUEST(IRQ) NUMBER MACROS
+ * @param2	- EnableDisable - 1=ENABLE 0=DISABLE
+ * */
+void SPI_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable){
+
+	if(EnableDisable>0){
+		if(IRQNumber<=31){//Determines if interrupt belongs to NVIC_ISER0
+			*NVIC_ISER_BASE |= (1<<IRQNumber);
+		}
+		else if(IRQNumber>=32&&IRQNumber<=63){//Determines if interrupt belongs to NVIC_ISER1
+			*NVIC_ISER_1 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=64&&IRQNumber<=95){//Determines if interrupt belongs to NVIC_ISER2
+			*NVIC_ISER_2 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=96&&IRQNumber<=127){//Determines if interrupt belongs to NVIC_ISER3
+			*NVIC_ISER_3 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=128&&IRQNumber<=159){//Determines if interrupt belongs to NVIC_ISER4
+			*NVIC_ISER_4 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=160&&IRQNumber<=191){//Determines if interrupt belongs to NVIC_ISER5
+			*NVIC_ISER_5 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=192&&IRQNumber<=223){//Determines if interrupt belongs to NVIC_ISER6
+			*NVIC_ISER_6 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=224&&IRQNumber<=239){//Determines if interrupt belongs to NVIC_ISER7
+			*NVIC_ISER_7 |= (1<<(IRQNumber%32));
+		}
+	}
+	else{
+		if(IRQNumber<=31){//Determines if interrupt belongs to NVIC_ICER0
+			*NVIC_ICER_BASE |= (1<<IRQNumber);
+		}
+		else if(IRQNumber>=32&&IRQNumber<=63){//Determines if interrupt belongs to NVIC_ICER1
+			*NVIC_ICER_1 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=64&&IRQNumber<=95){//Determines if interrupt belongs to NVIC_ICER2
+			*NVIC_ICER_2 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=96&&IRQNumber<=127){//Determines if interrupt belongs to NVIC_ICER3
+			*NVIC_ICER_3= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=128&&IRQNumber<=159){//Determines if interrupt belongs to NVIC_ICER4
+			*NVIC_ICER_4 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=160&&IRQNumber<=191){//Determines if interrupt belongs to NVIC_ICER5
+			*NVIC_ICER_5 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=192&&IRQNumber<=223){//Determines if interrupt belongs to NVIC_ICER6
+			*NVIC_ICER_6 |= (1<<(IRQNumber%32));
+		}
+		else if(IRQNumber>=224&&IRQNumber<=239){//Determines if interrupt belongs to NVIC_ICER7
+			*NVIC_ICER_7 |= (1<<(IRQNumber%32));
+		}
+
+	}
+}
+//SPI Interrupt Priority Configuration
+/* @func	- SPI_IRQ_Priority_Config
+ * @brief 	- Sets the priority for a given interrupt
+ * @param1	- IRQNumber - interrupt number for the SPI line you intend to configure. See stm32f429xx.h "INTERRPUT REQUEST(IRQ) NUMBER MACROS"
+ * @param2	- IRQPriority  - 4 bit priority value
+ * */
+void SPI_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority){
+	uint8_t IP_reg = IRQNumber/4;//Calculates which priority register address row the interrupt belongs to (0-59)
+	uint8_t IP_Section = IRQNumber%4;//This determines which partition the IRQ# belongs in. Each address row is divided into 4 byte sized partitions, one byte for each IRQNumber.
+	*(NVIC_ISPR_BASE+IP_reg) |= ((IRQPriority<<4)<<(IP_Section*8));//Shifts the value 4 bits past 0th partition bit(only bits 7:4 are read) and stores it in the correct priority register address row.
+}
+
+
+void SPI_IRQHandling(SPI_Handle_t *pSPIHandle){
+
+	if((pSPIHandle->pSPIx->CR2 & (1<<7))&&(pSPIHandle->pSPIx->SR&(1<<1))){//If TxBuffer empty interrupt enabled & Tx buffer empty
+		SPI_Tx_IR_Handle(pSPIHandle);
+	}
+	if((pSPIHandle->pSPIx->CR2 & (1<<6))&&(pSPIHandle->pSPIx->SR&(1<<0))){//If RxBuffer not empty interrupt enabled & Rx buffer not empty
+		SPI_Rx_IR_Handle(pSPIHandle);
+	}
+	if((pSPIHandle->pSPIx->CR2 & (1<<5))&&(pSPIHandle->pSPIx->SR&(1<<6))){//If error interrupt enabled & overrun error flag active
+		SPI_Ovr_IR_Handle(pSPIHandle);
+	}
+
+}
+
+static void SPI_Tx_IR_Handle(SPI_Handle_t *pSPIHandle){
+
+	while(pSPIHandle->TxLen > 0){
+			if(pSPIHandle->pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
+				pSPIHandle->pSPIx->DR = *((uint16_t*)pSPIHandle->pTxBuffer);//casting dereferenced data to 16 bits
+				pSPIHandle->TxLen-=2;//decrementing 2 for 2 bytes
+				(uint16_t*)pSPIHandle->pTxBuffer++;
+			}
+			else{//data frame size is 8 bit
+				pSPIHandle->pSPIx->DR = *pSPIHandle->pTxBuffer;
+				pSPIHandle->TxLen--;//decrementing 1 for 1 byte
+				pSPIHandle->pTxBuffer++;
+			}
+		}
+		SPI_Close_Tx(pSPIHandle);
+}
+static void SPI_Rx_IR_Handle(SPI_Handle_t *pSPIHandle){
+
+	while(pSPIHandle->RxLen > 0){
+			if(pSPIHandle->pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
+			*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->DR;
+			pSPIHandle->RxLen-=2;//decrementing 2 for 2 bytes
+			(uint16_t*)pSPIHandle->pRxBuffer++;
+			}
+			else{
+			*pSPIHandle->pRxBuffer = pSPIHandle->pSPIx->DR;
+			pSPIHandle->RxLen--;
+			pSPIHandle->pRxBuffer++;
+			}
+		}
+		SPI_Close_Rx(pSPIHandle);
+}
+
+static void SPI_Ovr_IR_Handle(SPI_Handle_t *pSPIHandle){
+	uint8_t temp;
+	temp = pSPIHandle->pSPIx->DR;
+	temp = pSPIHandle->pSPIx->SR;
+	(void)temp;
+}
+
+void SPI_Close_Tx(SPI_Handle_t *pSPIHandle){
+	pSPIHandle->pSPIx->CR2 &= ~(1<<7);//Disable Tx empty interrupt
+	pSPIHandle->pTxBuffer = NULL;
+	pSPIHandle->TxState = 0;
+}
+void SPI_Close_Rx(SPI_Handle_t *pSPIHandle){
+	pSPIHandle->pSPIx->CR2 &= ~(1<<6);//Disable Rx not empty interrupt
+	pSPIHandle->pRxBuffer = NULL;
+	pSPIHandle->RxState = 0;
+}
+

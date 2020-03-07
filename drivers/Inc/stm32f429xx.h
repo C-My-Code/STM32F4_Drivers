@@ -5,6 +5,7 @@
  *      Author: Kevin Miller
  */
 #include<stdint.h>
+#include<stddef.h>
 #ifndef INC_STM32F429XX_H_
 #define INC_STM32F429XX_H_
 
@@ -316,5 +317,12 @@ volatile uint32_t SYSCFG_CFGR;
 #define IRQ_NO_EXTI4	    10
 #define IRQ_NO_EXTI9_5	    23
 #define IRQ_NO_EXTI15_10	40
+
+#define IRQ_NO_SPI1			35
+#define IRQ_NO_SPI2			36
+#define IRQ_NO_SPI3			51
+#define IRQ_NO_SPI4			84
+#define IRQ_NO_SPI5			85
+#define IRQ_NO_SPI6			86
 
 #endif /* INC_STM32F429XX_H_ */
