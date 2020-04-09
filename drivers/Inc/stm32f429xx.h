@@ -1,8 +1,8 @@
 /*
  * stm32f429xx.h
  *
- *  Last Update on: Feb 21, 2020
- *      Author: Kevin Miller
+ *  Last update on: Mar 15, 2020
+ *      Author: Kevin
  */
 #include<stdint.h>
 #include<stddef.h>
@@ -88,6 +88,25 @@
 
 /*----------Peripheral Register Definition Structures-----------*/
 
+//I2C Register Definition Structure
+typedef struct{
+volatile uint32_t CR1;
+volatile uint32_t CR2;
+volatile uint32_t OAR1;
+volatile uint32_t OAR2;
+volatile uint32_t DR;
+volatile uint32_t SR1;
+volatile uint32_t SR2;
+volatile uint32_t CCR;
+volatile uint32_t TRISE;
+volatile uint32_t FLTR;
+}I2C_RegDef_t;
+
+//Creating I2C ports as a I2C_RegDef_t structure
+#define I2C1	((I2C_RegDef_t*)I2C1_BASE)
+#define I2C2	((I2C_RegDef_t*)I2C2_BASE)
+#define I2C3	((I2C_RegDef_t*)I2C3_BASE)
+
 //SPI Register Definition Structure
 typedef struct{
 volatile uint32_t CR1;
@@ -119,6 +138,19 @@ volatile uint32_t LCKR;
 volatile uint32_t AFRL;
 volatile uint32_t AFRH;
 }GPIO_RegDef_t;
+
+//Creating GPIO ports as a GPIO_RegDef_t structure
+#define GPIOA   ((GPIO_RegDef_t*)GPIOA_BASE)
+#define GPIOB   ((GPIO_RegDef_t*)GPIOB_BASE)
+#define GPIOC   ((GPIO_RegDef_t*)GPIOC_BASE)
+#define GPIOD   ((GPIO_RegDef_t*)GPIOD_BASE)
+#define GPIOE   ((GPIO_RegDef_t*)GPIOE_BASE)
+#define GPIOF   ((GPIO_RegDef_t*)GPIOF_BASE)
+#define GPIOG   ((GPIO_RegDef_t*)GPIOG_BASE)
+#define GPIOH   ((GPIO_RegDef_t*)GPIOH_BASE)
+#define GPIOI   ((GPIO_RegDef_t*)GPIOI_BASE)
+#define GPIOJ   ((GPIO_RegDef_t*)GPIOJ_BASE)
+#define GPIOK   ((GPIO_RegDef_t*)GPIOK_BASE)
 
 //RCC Register Definition Structure
 typedef struct{
@@ -159,20 +191,6 @@ volatile uint32_t PLLI2SCFGR;
 volatile uint32_t PLLSAICFGR;
 volatile uint32_t DCKCFGR;
 }RCC_RegDef_t;
-
-//Creating GPIO ports as a GPIO_RegDef_t structure
-#define GPIOA   ((GPIO_RegDef_t*)GPIOA_BASE)
-#define GPIOB   ((GPIO_RegDef_t*)GPIOB_BASE)
-#define GPIOC   ((GPIO_RegDef_t*)GPIOC_BASE)
-#define GPIOD   ((GPIO_RegDef_t*)GPIOD_BASE)
-#define GPIOE   ((GPIO_RegDef_t*)GPIOE_BASE)
-#define GPIOF   ((GPIO_RegDef_t*)GPIOF_BASE)
-#define GPIOG   ((GPIO_RegDef_t*)GPIOG_BASE)
-#define GPIOH   ((GPIO_RegDef_t*)GPIOH_BASE)
-#define GPIOI   ((GPIO_RegDef_t*)GPIOI_BASE)
-#define GPIOJ   ((GPIO_RegDef_t*)GPIOJ_BASE)
-#define GPIOK   ((GPIO_RegDef_t*)GPIOK_BASE)
-
 
 #define RCC   ((RCC_RegDef_t*)RCC_BASEADDR)
 

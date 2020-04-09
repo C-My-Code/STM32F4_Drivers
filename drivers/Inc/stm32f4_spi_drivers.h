@@ -1,7 +1,7 @@
 /*
  * stm32f4_spi_drivers.h
  *
- *  Created on: Feb 21, 2020
+ *  Last update on: Mar 15, 2020
  *      Author: Kevin
  */
 
@@ -197,8 +197,8 @@ void SPI_I2S_Disable(SPI_RegDef_t *pSPIx);
 void SPI_PCLK_Control(SPI_RegDef_t *pSPIx, uint8_t EnableDisable);
 
 //SPI Send & Receive - Blocking Call(non-interrupt)
-void SPI_Send(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length);
-void SPI_Receive(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length);
+void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length);
+void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length);
 
 //SPI Send & Receive - Interrupt
 void SPI_Send_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length);
@@ -210,9 +210,14 @@ void SPI_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority);
 void SPI_IRQHandling(SPI_Handle_t *pSPIHandle);
 static void SPI_Tx_IR_Handle();
 static void SPI_Rx_IR_Handle();
-static void SPI_Ovr_IR_Handle();
+void SPI_Ovr_IR_Handle(SPI_RegDef_t *pSPIx);
 
-void SPI_Close_Tx(SPI_Handle_t *pSPIHandle);
-void SPI_Close_Rx(SPI_Handle_t *pSPIHandle);
+//SPI Close Communication
+static void SPI_Close_Tx(SPI_Handle_t *pSPIHandle);
+static void SPI_Close_Rx(SPI_Handle_t *pSPIHandle);
+
+//SPI Clear Configuration Data(Clear garbage data)
+void SPI_Clear_Config(SPI_Handle_t *pSPIHandle);
+void SPI_I2S_Clear_Config(SPI_I2S_Handle_t *pI2SHandle);
 
 #endif /* INC_STM32F4_SPI_DRIVERS_H_ */

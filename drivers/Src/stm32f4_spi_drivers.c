@@ -1,7 +1,7 @@
 /*
  * stm32f4_spi_drivers.c
  *
- *  Created on: Feb 21, 2020
+ *  Last update on: Mar 15, 2020
  *      Author: Kevin
  */
 
@@ -64,10 +64,10 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
 	uint32_t temp2 = 0;//Temporary unsigned int for CR2 register value
 
 	//set Error interrupt
-	//temp2 |= (pSPIHandle->SPIConfig.ERRIE<<5);
+	temp2 |= (pSPIHandle->SPIConfig.ERRIE<<5);
 
 	//set Frame format
-	//temp2 |= (pSPIHandle->SPIConfig.FRF<<4);
+	temp2 |= (pSPIHandle->SPIConfig.FRF<<4);
 
 	//set SS output enable
 	temp2 |= (pSPIHandle->SPIConfig.SSOE<<2);
@@ -90,9 +90,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle){
  * @param1   - *pSPIx - pointer to SPI port base address
  * */
 void SPI_Disable(SPI_RegDef_t *pSPIx){
-	//Blocking loops to prevent disabling communication during transmission
-	//while(!(pSPIx->SPI_SR & 2));//Waits for Tx buffer to be empty
-	//while((pSPIx->SPI_SR & 1));//Waits for Rx buffer to be empty
+	//Blocking loop to prevent disabling communication during transmission
 	while((pSPIx->SR & 128));//Waits for Busy flag
 
 	pSPIx->CR1 &= ~(0xFFFF);//clears all bits in SPI_CR1 register
@@ -220,19 +218,19 @@ if(EnableDisable == 1){
  * @param2  - *pTxBuffer - pointer to location of data to be transmitted
  * @param3  - length - size of outbound data in bytes
  * */
-void SPI_Send(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
+void SPI_Send(SPI_RegDef_t *pSPIx, uint8_t *pTxBuffer, uint32_t length){
 
 	while(length > 0){
 
-		while(!(pSPIHandle->pSPIx->SR & 2));//Waiting for TX buffer to be empty(blocking call)
+		while(!(pSPIx->SR & 2));//Waiting for TX buffer to be empty(blocking call)
 
-		if(pSPIHandle->pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
-			pSPIHandle->pSPIx->DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
+		if(pSPIx->CR1 & (1<<11)){//If data frame size is 16 bit
+			pSPIx->DR = *((uint16_t*)pTxBuffer);//casting dereferenced data to 16 bits
 			length-=2;//decrementing 2 for 2 bytes
 			(uint16_t*)pTxBuffer++;
 		}
 		else{//data frame size is 8 bit
-			pSPIHandle->pSPIx->DR = *pTxBuffer;
+			pSPIx->DR = *pTxBuffer;
 			length--;//decrementing 1 for 1 byte
 			pTxBuffer++;
 		}
@@ -248,24 +246,24 @@ void SPI_Send(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
  * @param2  - *pRxBuffer - pointer to location received data is to be stored
  * @param3  - length - size of inbound data in bytes
  * */
-void SPI_Receive(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length){
+void SPI_Receive(SPI_RegDef_t *pSPIx, uint8_t *pRxBuffer, uint32_t length){
 
 	while(length > 0){
-		while(pSPIHandle->pSPIx->SR & 0x01);//Waiting for data to be in buffer(blocking call)
-		if(pSPIHandle->pSPIx->CR1 & (1<<11)){
-		*((uint16_t*)pRxBuffer) = pSPIHandle->pSPIx->DR;
+		while(pSPIx->SR & 0x01);//Waiting for data to be in buffer(blocking call)
+		if(pSPIx->CR1 & (1<<11)){
+		*((uint16_t*)pRxBuffer) = pSPIx->DR;
 		length-=2;
 		(uint16_t*)pRxBuffer++;
 		}
 		else{
-		*pRxBuffer = pSPIHandle->pSPIx->DR;
+		*pRxBuffer = pSPIx->DR;
 		length--;
 		pRxBuffer++;
 		}
 	}
 }
 
-//SPI Send & Receive - Interrupt based
+//SPI Send - Interrupt based
 void SPI_Send_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
 
 	if(!(pSPIHandle->TxState == 1)){//Checks for idle Tx
@@ -276,6 +274,7 @@ void SPI_Send_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pTxBuffer, uint32_t length){
 	}
 
 }
+//SPI Receive - Interrupt based
 void SPI_Receive_Ir(SPI_Handle_t *pSPIHandle, uint8_t *pRxBuffer, uint32_t length){
 
 	if(!(pSPIHandle->RxState == 1)){
@@ -408,21 +407,66 @@ static void SPI_Rx_IR_Handle(SPI_Handle_t *pSPIHandle){
 		SPI_Close_Rx(pSPIHandle);
 }
 
-static void SPI_Ovr_IR_Handle(SPI_Handle_t *pSPIHandle){
+void SPI_Ovr_IR_Handle(SPI_RegDef_t *pSPIx){
 	uint8_t temp;
-	temp = pSPIHandle->pSPIx->DR;
-	temp = pSPIHandle->pSPIx->SR;
+	temp = pSPIx->DR;
+	temp = pSPIx->SR;
 	(void)temp;
 }
 
-void SPI_Close_Tx(SPI_Handle_t *pSPIHandle){
+static void SPI_Close_Tx(SPI_Handle_t *pSPIHandle){
 	pSPIHandle->pSPIx->CR2 &= ~(1<<7);//Disable Tx empty interrupt
 	pSPIHandle->pTxBuffer = NULL;
 	pSPIHandle->TxState = 0;
 }
-void SPI_Close_Rx(SPI_Handle_t *pSPIHandle){
+static void SPI_Close_Rx(SPI_Handle_t *pSPIHandle){
 	pSPIHandle->pSPIx->CR2 &= ~(1<<6);//Disable Rx not empty interrupt
 	pSPIHandle->pRxBuffer = NULL;
 	pSPIHandle->RxState = 0;
 }
+
+//SPI Clear Configuration Data(Clear garbage data)
+/* @func	- SPI_Clear_Config
+ * @brief 	- Clears garbage data from configuration memory locations. If called immediately after handle declaration, you do not have to declare default configuration values.
+ * @param1	- *pSPIHandle - Pointer to handle configuration you wish to clear
+ * */
+void SPI_Clear_Config(SPI_Handle_t *pSPIHandle){
+	pSPIHandle->SPIConfig.BIDIMODE = 0;
+	pSPIHandle->SPIConfig.BIDIOE = 0;
+	pSPIHandle->SPIConfig.DFF = 0;
+	pSPIHandle->SPIConfig.RXONLY = 0;
+	pSPIHandle->SPIConfig.SSM = 0;
+	pSPIHandle->SPIConfig.SSI = 0;
+	pSPIHandle->SPIConfig.LSBFIRST = 0;
+	pSPIHandle->SPIConfig.SPE = 0;
+	pSPIHandle->SPIConfig.BR = 0;
+	pSPIHandle->SPIConfig.MSTR = 0;
+	pSPIHandle->SPIConfig.CPOL = 0;
+	pSPIHandle->SPIConfig.CPHA = 0;
+	pSPIHandle->SPIConfig.ERRIE = 0;
+	pSPIHandle->SPIConfig.FRF = 0;
+	pSPIHandle->SPIConfig.SSOE = 0;
+}
+
+//SPI I2S Clear Configuration Data(Clear garbage data)
+/* @func	- SPI_I2S_Clear_Config
+ * @brief 	- Clears garbage data from configuration memory locations. If called immediately after handle declaration, you do not have to declare default configuration values.
+ * @param1	- *pI2SHandle - Pointer to handle configuration you wish to clear
+ * */
+void SPI_I2S_Clear_Config(SPI_I2S_Handle_t *pI2SHandle){
+	pI2SHandle->I2SConfig.I2SMOD = 0;
+	pI2SHandle->I2SConfig.I2SE = 0;
+	pI2SHandle->I2SConfig.I2SCFG = 0;
+	pI2SHandle->I2SConfig.PCMSYNC = 0;
+	pI2SHandle->I2SConfig.I2SSTD = 0;
+	pI2SHandle->I2SConfig.CKPOL = 0;
+	pI2SHandle->I2SConfig.DATLEN = 0;
+	pI2SHandle->I2SConfig.CHLEN = 0;
+	pI2SHandle->I2SPrescaler.MCKOE = 0;
+	pI2SHandle->I2SPrescaler.ODD = 0;
+	pI2SHandle->I2SPrescaler.I2SDIV = 0;
+	pI2SHandle->I2SRCCPLL.PLLI2SR = 0;
+	pI2SHandle->I2SRCCPLL.PLLI2SN = 0;
+}
+
 

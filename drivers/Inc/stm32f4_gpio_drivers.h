@@ -1,8 +1,8 @@
 /*
  * stm32f4_gpio_drivers.h
  *
- *  Last Update on: Jan 25, 2020
- *      Author: Kevin Miller
+ *  Last Update on: Feb 14, 2020
+ *      Author: Kevin
  */
 
 #ifndef INC_STM32F4_GPIO_DRIVERS_H_
@@ -96,9 +96,6 @@ void GPIO_Toggle_OutputPin(GPIO_RegDef_t *pGPIOx, uint8_t pinnumber);
 void GPIO_IRQ_EnableDisable(uint8_t IRQNumber, uint8_t EnableDisable);
 void GPIO_IRQ_Priority_Config(uint8_t IRQNumber, uint8_t IRQPriority);
 void GPIO_IRQHandling(uint8_t pinnumber);
-
-
-
 
 
 #endif /* INC_STM32F4_GPIO_DRIVERS_H_ */
